@@ -1,0 +1,162 @@
+---
+title: "Introdução ao Linux para Bioinformática"
+subtitle: "Minicurso - Workshop de Virologia"
+author: "Gabriel Rodrigues"
+institute: "UESC - Universidade Estadual de Santa Cruz"
+format:
+  revealjs:
+    theme: dark
+    slide-number: true
+    transition: slide
+    chalkboard: true
+    highlight-style: github
+    css: styles.css
+---
+
+# Módulo 1: Fundamentos do Sistema {background-color="#002b36"}
+
+## A Origem: Um Esforço Conjunto
+
+O "Linux" é a união de duas forças da computação:
+
+:::: {.columns}
+::: {.column width="50%"}
+### Projeto GNU (1983)
+* **Richard Stallman**
+* Movimento do Software Livre.
+* Criou ferramentas essenciais: compiladores, bash, editores.
+* Filosofia: o software deve ser livre para uso e estudo.
+:::
+
+::: {.column width="50%"}
+### Kernel Linux (1991)
+* **Linus Torvalds**
+* Desenvolveu o *kernel* (núcleo que gerencia o hardware).
+* Disponibilizado gratuitamente.
+* **A União:** Ferramentas GNU + Kernel Linux = Sistema Operacional Completo.
+:::
+::::
+
+## Por que Linux na Bioinformática?
+
+:::{.incremental}
+- **Desempenho:** Padrão absoluto em servidores e clusters genômicos.
+- **Ferramentas Nativas:** O terminal possui comandos nativos poderosos para processamento de texto.
+- **Ecossistema:** Maioria dos softwares (ex: BWA, BLAST, pipelines virais) roda nativamente no Linux.
+- **Reprodutibilidade:** É mais fácil documentar uma linha de comando do que cliques de mouse.
+:::
+
+## Anatomia do Sistema de Arquivos
+
+Esqueça o "Disco C:". A hierarquia do Linux é baseada em diretórios.
+
+* `/` **(Raiz/Root):** A base do sistema. Tudo está contido aqui.
+* `~` **(Home):** Seu diretório pessoal (`/home/gabriel/`). Seu espaço seguro.
+
+> **Caminho Absoluto:** `/home/gabriel/projeto/dados.fasta`
+> 
+> **Caminho Relativo:** `projeto/dados.fasta` (partindo de `/home/gabriel/`)
+
+## Navegação (Prática)
+
+Comandos para se localizar e mover pelo sistema:
+
+```bash
+# Onde estou? (Print Working Directory)
+pwd 
+
+# O que tem aqui? (List)
+ls
+ls -l   # Formato longo (detalhes e permissões)
+ls -a   # Mostra arquivos ocultos (iniciados com .)
+ls -lh  # Tamanhos legíveis (KB, MB, GB)
+
+# Para onde vou? (Change Directory)
+cd pasta_projeto/
+cd ..   # Volta uma pasta acima
+cd ~    # Volta para a Home
+cd -    # Retorna ao último diretório
+```
+
+# Módulo 2: O Ciclo de Vida dos Dados e Arquivos Essenciais {background-color="#194a50"}
+
+## 1. O Ponto de Partida: FASTQ e FASTA
+
+A base de qualquer análise genômica começa com a leitura e a referência.
+
+## FASTQ (Os Dados Brutos)
+- **Função:** Armazenar as leituras (*reads*) brutas geradas pelo sequenciador, juntamente com a margem de erro matemática de cada base lida.
+- **Estrutura (4 linhas por read):**
+
+1. Identificador da read (`@...`)
+2. Sequência de nucleotídeos
+3. Separador (`+`)
+4. Código ASCII representando o *Phred Quality Score* (a probabilidade de erro daquela base).
+
+## Exemplo de FASTQ
+
+```bash
+@VL00749:13:AAFLFMHM5:1:1101:64964:1151 1:N:0:TCCGCCAATT+CTGCACGGAG
+TNTCCTCTCCTCCTCCTGAATCTTTGGCACAACCACTTTAAGCACACCATTCTTACTGTCTCTTATACACATCTCCGAGCCCACGTGTCTCCGCCAATTTTCGGGTTTGGCGTCTTGTGCTTGATTTGTGGGNGGGGGGGGGGGGGGGGGG
++
+-#;--CCCCCCCCCCC-CCC;CCCCCCCCCCCCCCCC--C;CCCCCCCCCCCCCCCCCCC-CCCCCCCCCCCCCCC-CCCCC;C;C-C-CCCCCCC-CCCC--CC;-CCC-C-C-CC-C-;---;----;-C#CCCCCC-CCCCCCCCCCC
+@VL00749:13:AAFLFMHM5:1:1101:59075:1170 1:N:0:TGCGCCAATT+CTGCACGGAG
+TNTGTCTCTTATACACATCTCCGAGCCCACGAGACTCCGCCAATTATCTGGTATGCCGTCTTCTGCTTGAAAAAAGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGNGGGGGGGGGGGGGGGGGG
++
+C#;CCC;CCCCCCCCCCCCCCCCC;CCCCCCCCCC-CCCCC;CCCCCCC-CC;CCCCCCC;C-CC;--CC-CC-C-CCCCCCCCCCCCCCCCCCCCCCCCCC;CCCCCCCCCCCCCCCCCCCCCCCCCCCCC#CCCCCCCCCCCCCCCCCC
+@VL00749:13:AAFLFMHM5:1:1101:62218:1170 1:N:0:TCCGCCAATT+CAGCACGGAG
+TGTGTCTCTTATACACATCTCCGAGCCCACGAGACTCCGCCAATTATCTCGTATGCCGTCTTGTGCTTGAAAAAAGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGNGGGGGGGGGGGGGGGGGG
+```
+
+## FASTA (A Referência ou Montagem final)
+- **Função:** Armazenar sequências contínuas puras (genomas de referência, *contigs* montados após *de novo*, ou sequências de proteínas).
+- **Estrutura:** Cabeçalho informativo iniciando com `>` seguido da sequência contínua. Não possui dados de qualidade.
+
+## Exemplo de FASTA
+
+```bash
+>contig_01
+CAACAGCTTAATTGGCATTGAAATATGCTTCACATAAAATCCTCTTCAAGTTCCTGCAAT
+GACTTGCTTGTCTCTGCAATTTGTTTGTTTGATGTCATCTTTTCAGAGACCATGAGACCC
+TTATAGCTTCTTATCTCTGCTTGCCTTTCCTTCTCAAACCTTTCAACCACCACCGGTCAC
+CTGATCTACAAGCTTGGAGGTATTGACAAGCGTGTGATTGAGAGGTTCGAGAAGGAAGCT
+GCTGAGATGAACAAGAGGTCGTTCAAGTATGCTTGGGTGCTTGACAAGCTCAAGGCCGAG
+CGTGAGCGTGGTATTACCATCGATATCGCCTTGTGGAAGTTCGAGACCACCAAGTACTAC
+TGCACTGTTATTGATGCCCCTGGACATCGTGACTTTATCAAGAACATGATCACTGGTACC
+TCACAGGCTGACTGTGCTGTCTTGATTATTGATTCCACCACTGGTGGTTTCGAGGCTGGT
+ATTTCCAAGGACGGTCAGCCTCGTGAGCACGCTTTGCTTGCCTTTACCCTTGGTGTCAAG
+CAGATGATTTGCTGCTGCAACAAGATGGATGCCACAACCCCAAAGTACTCCAAGGCGAGG
+TATGATGAAATTGTTAAGGAAGTCTCTTCTTATCTTAAGAAAGTTGGTTACAACCCTGAG
+AAGATCCCATTTGTCCCAATCTCTGGTTTTGAGGGTGATAACATGATTGAGAGGTCTACA
+AACCTTGACTGGTACAAGGGTCCCACTCTTCTCGATGCTCTTGACCAGATCAATGAGCCC
+AAGAGGCCCTCAGACAAGCCACTTCGTCTCCCACTTCAGGATGTCTACAAGATTGGTGGT
+ATTGGAACTGTCCCTGTTGGTCGTGTTGAGACTGGTACCCTTAAGCCTGGTATGGTCGTG
+ACCTTTGGCCCCACTGGTCTGACCACTGAAGTAAAGTCTGTTGAGATGCACCATGAAGCC
+CTCCAGGAGGCTCTCCCTGGTGATAATGTTGGGTTCAATGTTAAGAATGTTGCTGTTAAG
+GATCTCAAGCGTGGTTTTGTTGCATCTAACTCTAAGGATGATCCTGCCAAGGAAGCTGCC
+AGCTTCACCTCTCAGGTCATCATCATGAACCACCCTGGCCAGATTGGAAATGGATATGCC
+```
+
+## 2. Mapeamento e Alinhamento: SAM e BAM
+
+Onde as milhares de *reads* (FASTQ) encontram o seu lugar no genoma de referência (FASTA).
+
+## SAM (Sequence Alignment Map)
+- **Função:** Um formato de texto tabular que descreve exatamente *onde* e *como* cada read se alinhou na referência.
+- **O Problema:** Arquivos SAM são gigantescos. Um único sequenciamento pode gerar um arquivo de centenas de gigabytes em texto puro, engasgando os servidores.
+
+## BAM (Binary Alignment Map)
+- **Função:** A versão compactada e binária do arquivo SAM, compreensível para a máquina, mas não para olhos humanos (`cat` ou `less` não funcionam aqui, usamos o `samtools`).
+- **A Grande Vantagem:** Além de economizar muito espaço, o BAM pode ser **indexado** (gerando um `.bai`). Isso permite que os softwares extraiam dados de uma região genômica específica instantaneamente, sem ler o arquivo inteiro.
+
+## 3. Descoberta: Variantes e Anotações (VCF e GFF)
+
+A etapa final: entender as mutações da amostra e mapear a biologia do organismo.
+
+## VCF (Variant Call Format)
+- **Função:** Armazenar as variações genéticas da sua amostra em relação à referência (SNPs, inserções, deleções, e até genomas virais defectivos). 
+- **Estrutura:** Cada linha relata uma coordenada do genoma, qual era a base original (Ref), a base mutada encontrada (Alt) e métricas estatísticas confirmando aquela mutação. Fundamental para epidemiologia genômica.
+
+## GFF / GTF (General Feature Format)
+* **Função:** O mapa geográfico do genoma. É um arquivo tabular que fornece as "coordenadas" biológicas.
+* **Uso:** Informa aos softwares e pesquisadores em quais posições exatas começam e terminam os genes funcionais, as regiões codificantes (CDS), e regiões regulatórias.
